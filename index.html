@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f1e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="COBSANYAのおもちゃたちを救え！ キュウカンバーマンの縦スクロールシューティング">
+  <title>CUCUMBERMAN: Toy Shelf Guardian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="game-root">
+    <canvas id="game"></canvas>
+
+    <!-- プレイ中のボタン -->
+    <div id="hud" class="hidden">
+      <button id="btn-pause" class="hud-pause" aria-label="ポーズ"><span></span><span></span></button>
+      <div class="power-buttons">
+        <button id="btn-barrier" class="power-btn" aria-label="バリア">
+          <img src="assets/characters/bull_chan.png" alt="">
+          <span class="power-label">バリア</span>
+          <span class="power-cd"></span>
+        </button>
+        <button id="btn-special" class="power-btn" aria-label="必殺技">
+          <img src="assets/characters/jack.png" alt="">
+          <span class="power-label">ひっさつ</span>
+        </button>
+        <button id="btn-fire" class="fire-btn" aria-label="ショット">
+          <span class="fire-icon"></span>
+          <span class="power-label">ショット</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 読み込み -->
+    <section id="screen-loading" class="screen active">
+      <div class="loading-box">
+        <div class="loading-title">CUCUMBERMAN</div>
+        <div class="loading-bar"><div id="loading-fill"></div></div>
+        <button id="btn-boot" class="btn big hidden">タップしてはじめる</button>
+      </div>
+    </section>
+
+    <!-- タイトル -->
+    <section id="screen-title" class="screen">
+      <img class="kv" src="assets/ui/title_key_visual.jpg" alt="">
+      <div class="logo">
+        <div class="logo-main" data-text="CUCUMBERMAN">CUCUMBERMAN</div>
+        <div class="logo-sub">Toy Shelf Guardian</div>
+      </div>
+      <div class="title-bottom">
+        <button id="btn-start" class="btn big pulse">スタート</button>
+        <div class="title-meta">
+          <button id="btn-sound" class="btn small">音: ON</button>
+          <span id="title-hiscore"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 難易度 -->
+    <section id="screen-difficulty" class="screen modal">
+      <div class="panel">
+        <h2>むずかしさを えらぶ</h2>
+        <button class="btn diff-btn" data-diff="easy">
+          <span class="diff-name">やさしい</span>
+          <span class="diff-desc">弾が少なめ。はじめての人や子どもでもクリアできる</span>
+        </button>
+        <button class="btn diff-btn" data-diff="normal">
+          <span class="diff-name">ふつう</span>
+          <span class="diff-desc">後半は弾が増える。ボス戦は手ごたえあり</span>
+        </button>
+        <button class="btn small ghost" data-close>もどる</button>
+      </div>
+    </section>
+
+    <!-- ステージ選択 -->
+    <section id="screen-select" class="screen">
+      <header class="select-head">
+        <button class="btn small ghost" id="btn-select-back">◀ タイトル</button>
+        <h2>ステージ</h2>
+        <button class="btn small" id="btn-select-diff"></button>
+      </header>
+      <div id="stage-list"></div>
+      <div class="friends-row">
+        <div class="friends-title">仲間</div>
+        <div id="friends-list"></div>
+      </div>
+      <div class="select-foot">
+        <button class="btn small ghost" id="btn-buttons-side">ボタン: 右</button>
+        <button class="btn small ghost" id="btn-sound-2">音: ON</button>
+      </div>
+    </section>
+
+    <!-- 会話 -->
+    <section id="screen-dialog" class="screen dialog">
+      <div class="dlg-backdrop"></div>
+      <div class="dlg-portrait left"></div>
+      <div class="dlg-portrait right"></div>
+      <div class="dlg-box">
+        <div class="dlg-name"></div>
+        <div class="dlg-text"></div>
+        <div class="dlg-next">▼</div>
+      </div>
+      <button class="dlg-skip">スキップ ▶▶</button>
+    </section>
+
+    <!-- 仲間の救出 -->
+    <section id="screen-rescue" class="screen modal">
+      <div class="panel rescue">
+        <div class="rescue-title">RESCUE!</div>
+        <div class="cage">
+          <img class="rescue-img" alt="">
+          <div class="cage-bars"></div>
+        </div>
+        <div class="rescue-name"></div>
+        <div class="rescue-power"></div>
+        <button class="btn big" id="btn-rescue-ok">つぎへ</button>
+      </div>
+    </section>
+
+    <!-- ステージクリア -->
+    <section id="screen-result" class="screen modal">
+      <div class="panel">
+        <div class="result-title">STAGE CLEAR!</div>
+        <div class="result-rows"></div>
+        <button class="btn big" id="btn-next">つぎのステージへ</button>
+        <button class="btn small ghost" id="btn-result-select">ステージ選択へ</button>
+      </div>
+    </section>
+
+    <!-- ゲームオーバー -->
+    <section id="screen-gameover" class="screen modal">
+      <div class="panel">
+        <div class="result-title over">GAME OVER</div>
+        <div class="gameover-score"></div>
+        <p class="gameover-msg">このステージは最初からやり直しだ</p>
+        <button class="btn big" id="btn-over-select">ステージ選択へ</button>
+      </div>
+    </section>
+
+    <!-- ポーズ -->
+    <section id="screen-pause" class="screen modal">
+      <div class="panel">
+        <div class="result-title">PAUSE</div>
+        <button class="btn big" id="btn-resume">つづける</button>
+        <button class="btn small ghost" id="btn-retire">ステージ選択へ</button>
+      </div>
+    </section>
+
+    <!-- エンディング -->
+    <section id="screen-ending" class="screen">
+      <img class="kv" src="assets/ui/ending.jpg" alt="">
+      <div class="ending-text"></div>
+      <div class="ending-bottom">
+        <div class="ending-score"></div>
+        <button class="btn big" id="btn-ending-title">タイトルへ</button>
+      </div>
+    </section>
+
+    <div id="rotate-notice">スマホを縦にしてね</div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/assets.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/enemies.js"></script>
+  <script src="js/bosses.js"></script>
+  <script src="js/story.js"></script>
+  <script src="js/stages.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
